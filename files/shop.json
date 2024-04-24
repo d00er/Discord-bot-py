@@ -1,0 +1,7 @@
+{
+    "number-of-item": {
+        "name" : "name of item",
+        "precio": "price of item, int"
+    }
+
+}
