@@ -95,6 +95,64 @@ class welcome(commands.Cog):
 
         with open("files/welcome.json", "w") as f:
             json.dump(self.data, f, indent=4)
+    
+    @commands.group(name="goodbye", invoke_without_command = True)
+    @commands.has_permissions(administrator=True)
+    async def goodbye(self, ctx):
+
+        with open("files/welcome.json", "r") as f:
+            data = json.load(f)
+
+        data[str(ctx.guild.id)] = {}
+        data[str(ctx.guild.id)]["ChannelG"] = None
+        data[str(ctx.guild.id)]["MessageG"] = None
+        data[str(ctx.guild.id)]["AutoRoleG"] = None
+        data[str(ctx.guild.id)]["ImageUrlG"] = None
+        
+
+        with open("files/welcome.json", "w") as f:
+            json.dump(data, f, indent=4)
+            
+        info_embed = discord.Embed(title="Goodbye system setup", description="create a unique goodbye system for your server", color=discord.Color.light_grey())
+        info_embed.add_field(name="autorole", value="select the role that is going to have a person when he enters the server!", inline=False)
+        info_embed.add_field(name="message", value="select the message that is going to be in the welcome embed!", inline=False)
+        info_embed.add_field(name="channel", value="select the channel that your card is going to be sent in!", inline=False)
+        info_embed.add_field(name="image", value="select the image that is going to be in the welcome of a new member", inline=False)
+        
+        await ctx.send(embed = info_embed)
+
+
+    @goodbye.command()
+    @commands.has_permissions(administrator=True)
+    async def autorole(self, ctx, role:discord.Role):
+        self.data[str(ctx.guild.id)]["AutoRoleG"] = str(role.name)
+
+        with open("files/welcome.json", "w") as f:
+            json.dump(self.data, f, indent=4)
+    
+    @goodbye.command()
+    @commands.has_permissions(administrator=True)
+    async def message(self, ctx, *, msg):
+        self.data[str(ctx.guild.id)]["MessageG"] = str(msg)
+
+        with open("files/welcome.json", "w") as f:
+            json.dump(self.data, f, indent=4)
+    
+    @goodbye.command()
+    @commands.has_permissions(administrator=True)
+    async def channel(self, ctx, channel:discord.TextChannel):
+        self.data[str(ctx.guild.id)]["ChannelG"] = str(channel.name)
+
+        with open("files/welcome.json", "w") as f:
+            json.dump(self.data, f, indent=4)
+
+    @goodbye.command()
+    @commands.has_permissions(administrator=True)
+    async def imageurl(self, ctx, *, url):
+        self.data[str(ctx.guild.id)]["ImageUrlG"] = str(url)
+
+        with open("files/welcome.json", "w") as f:
+            json.dump(self.data, f, indent=4)
 
 
 

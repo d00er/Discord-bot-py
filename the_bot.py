@@ -3,16 +3,26 @@ import discord
 from discord.ext import commands, tasks
 from itertools import cycle
 import consts
-#python utils
+# python utils
 import os, asyncio, json
+# database
+from cogs.data_base.client import db_client
+from cogs.data_base.model.server import Server
+from cogs.data_base.schemas.server import server_schema
+
+# https://discord.com/oauth2/authorize?client_id=1219376993989169282&permissions=8&scope=bot
+
+
 
 def get_server_prefixes(client, message):
-    with open("files/prefixes.json", "r") as j:
-        prefix = json.load(j)
+    server_prefix= Server(**server_schema(db_client.local.servers.find_one({"id": str(message.guild.id)})))
+    return server_prefix.prefix
 
-    return prefix[str(message.guild.id)]
 
-client = commands.Bot(command_prefix=get_server_prefixes, intents=discord.Intents.all())
+intents=discord.Intents.all()
+intents.message_content = True
+intents.voice_states = True
+client = commands.Bot(command_prefix=get_server_prefixes, intents=intents)
 client.remove_command("help")
 
 bot_status = cycle(["type in '!help' for help", "type !config to config de bot to your necesities", "thanks for using!"])
@@ -31,13 +41,15 @@ async def on_ready():
 
 @client.event
 async def on_guild_join(guild):
-    with open("files/prefixes.json", "r") as j:
-        prefix = json.load(j)
+    try:
 
-    prefix[str(guild.id)] = "!"
+        default_prefix = "!"
+        new_server = dict(Server(id=str(guild.id), prefix=default_prefix))
+        print(new_server)
+        db_client.local.servers.insert_one(new_server)
 
-    with open("files/prefixes.json", "w") as f:
-        json.dump(prefix, f, indent=4)
+    except Exception as error:
+        print(error)
 
     with open("files/mutes.json", "r") as f:
         mute_role = json.load(f)
@@ -46,18 +58,19 @@ async def on_guild_join(guild):
     with open("files/mutes.json", "w") as f:
         json.dump(mute_role, f, indent=3)
     
+    with open("files/shop.json", "r") as z:
+        shop = json.load(z)
+    shop[str(guild.id)] = {}
 
+    with open("files/shop.json", "w") as f:
+        json.dump(shop, f, indent=4)
+    
 
 
 @client.event
 async def on_guild_remove(guild):
-    with open("files/prefixes.json", "r") as j:
-        prefix = json.load(j)
 
-    prefix.pop(str(guild.id))
-
-    with open("files/prefixes.json", "w") as f:
-        json.dump(prefix, f, indent=4)
+    db_client.local.servers.find_one_and_delete({"id": str(guild.id)})
 
     with open("files/mutes.json", "r") as f:
         mute_role = json.load(f)
@@ -65,6 +78,13 @@ async def on_guild_remove(guild):
         mute_role.pop(str(guild.id))
     with open("files/mutes.json", "w") as f:
         json.dump(mute_role, f, indent=4)
+
+    with open("files/shop.json", "r") as z:
+        shop = json.load(z)
+    shop.pop(str(guild.id))
+
+    with open("files/shop.json", "w") as f:
+        json.dump(shop, f, indent=4)
 
 ### SLASH COMMANDS ###
 
@@ -77,10 +97,8 @@ async def hello( interaction= discord.Interaction):
 @client.command()
 async def prefix(ctx):
     try:
-        with open("files/prefixes.json", "r") as f:
-            prefixes=json.load(f)
-            
-        await ctx.send(prefixes[str(ctx.guild.id)])
+        server_prefix= Server(**server_schema(db_client.local.servers.find_one({"id": str(ctx.guild.id)})))
+        return ctx.send(server_prefix.prefix)
     except Exception as error:
         print(error)
 
@@ -101,13 +119,9 @@ async def server_id( ctx):
 
 @client.command()
 async def set_prefix(ctx, *, newprefix: str):
-    with open("files/prefixes.json", "r") as j:
-        prefix = json.load(j)
 
-    prefix[str(ctx.guild.id)] = newprefix
-
-    with open("files/prefixes.json", "w") as f:
-        json.dump(prefix, f, indent=4)
+    server_change = dict(Server(id=str(ctx.guild.id), prefix=newprefix))
+    db_client.local.servers.find_one_and_replace({"id": str(ctx.guild.id)}, server_change)
 
     prefix_embed = discord.Embed(title="Succes!", description="you changed the prefix of this bot.", color=discord.Color.blurple())
     prefix_embed.add_field(name="the prefix now is:", value=newprefix)

@@ -74,6 +74,14 @@ class level_system(commands.Cog):
             await ctx.send(embed = level_embed)
         except Exception as error:
             print(error)
+    
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def level_channel(self, ctx, channel:discord.TextChannel):
+        self.data[str(ctx.guild.id)]["Channel"] = str(channel.name)
+
+        with open("files/welcome.json", "w") as f:
+            json.dump(self.data, f, indent=4)
         
 
         

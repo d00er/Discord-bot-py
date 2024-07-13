@@ -1,6 +1,7 @@
+
 import discord 
 from discord.ext import commands
-import random, json, requests
+import random, json, requests, re
 
 class economy(commands.Cog):
     def __init__(self, client):
@@ -183,7 +184,7 @@ class economy(commands.Cog):
             print(error)
 
     @commands.command()
-    async def deposit(self,ctx, amount):
+    async def deposite(self, ctx, amount):
         try:
             limit= 250
             amount = int(amount)
@@ -196,8 +197,12 @@ class economy(commands.Cog):
                 data[str(ctx.author.id)] = {}
                 data[str(ctx.author.id)]["Balance"] = 100
                 data[str(ctx.author.id)]["Deposit"] = 0
-                
-            if amount<=limit:
+
+            if amount <= 0:
+                withdrawl_embed = discord.Embed(title="Wtf you dumb?", description=f"You cant do that", color=discord.Color.red())
+                withdrawl_embed.add_field(name="Your bank balance is:", value=data[str(ctx.author.id)]["Deposit"])
+                await ctx.send(embed = withdrawl_embed)
+            elif amount<=limit:
                 data[str(ctx.author.id)]["Deposit"] += amount
                 data[str(ctx.author.id)]["Balance"] -= amount
 
@@ -209,6 +214,7 @@ class economy(commands.Cog):
 
                 with open("files/eco.json", "w") as f:
                     json.dump(data, f, indent=4)
+            
             else:
                 await ctx.send(f"This amount is to big, could you please insert one that is less than ${limit}")
         except Exception as error:
@@ -223,18 +229,22 @@ class economy(commands.Cog):
 
             data[str(ctx.author.id)] = {}
             data[str(ctx.author.id)]["Balance"] = 100
+        if amount <= 0 or amount > data[str(ctx.author.id)]["Deposit"]:
+            withdrawl_embed = discord.Embed(title="Wtf you dumb?", description=f"You cant do that", color=discord.Color.red())
+            withdrawl_embed.add_field(name="Your bank balance is:", value=data[str(ctx.author.id)]["Deposit"])
+            await ctx.send(embed = withdrawl_embed)
+        else:
+            data[str(ctx.author.id)]["Deposit"] -= amount
+            data[str(ctx.author.id)]["Balance"] += amount
 
-        data[str(ctx.author.id)]["Deposit"] -= amount
-        data[str(ctx.author.id)]["Balance"] += amount
+            withdrawl_embed = discord.Embed(title="Succes!", description=f"You have withdrawed", color=discord.Color.green())
+            withdrawl_embed.add_field(name="You have withrawed:", value=amount)
+            withdrawl_embed.add_field(name="Your bank balance is:", value=data[str(ctx.author.id)]["Deposit"])
 
-        withdrawl_embed = discord.Embed(title="Succes!", description=f"You have withdrawed", color=discord.Color.green())
-        withdrawl_embed.add_field(name="You have withrawed:", value=amount)
-        withdrawl_embed.add_field(name="Your bank balance is:", value=data[str(ctx.author.id)]["Deposit"])
+            await ctx.send(embed = withdrawl_embed)
 
-        await ctx.send(embed = withdrawl_embed)
-
-        with open("files/eco.json", "w") as f:
-            json.dump(data, f, indent=4)
+            with open("files/eco.json", "w") as f:
+                json.dump(data, f, indent=4)
     
     #SCRAPPED BY NOW
     """
@@ -260,8 +270,8 @@ class economy(commands.Cog):
             
             shop_embed= discord.Embed(title="The shop", description="Buy things with your balance", color=discord.Color.yellow())
             
-            for i in data:
-                shop_embed.add_field(name=f"{data[str(i)]["name"]}", value={data[str(i)]["precio"]}, inline=False)
+            for i in data[str(ctx.guild.id)]:
+                shop_embed.add_field(name=f"{data[str(ctx.guild.id)][str(i)]["name"]}", value={data[str(ctx.guild.id)][str(i)]["price"]}, inline=False)
 
             await ctx.send(embed = shop_embed)
         except Exception as error:
@@ -275,23 +285,24 @@ class economy(commands.Cog):
                 data = json.load(f)
             
 
-            for i in data:
+            for i in data[str(ctx.guild.id)]:
                 try:
-                    if data[i]["name"] == item:
+                    if data[str(ctx.guild.id)][i]["name"] == item:
                         with open("files/eco.json", "r") as f:
                             economic = json.load(f)
-                        if data[i]["precio"] < economic[str(ctx.author.id)]["Balance"]:
+                
+                        if int(data[str(ctx.guild.id)][i]["price"]) < economic[str(ctx.author.id)]["Balance"]:
 
-                            economic[str(ctx.author.id)]["Balance"] -= data[i]["precio"]
+                            economic[str(ctx.author.id)]["Balance"] -= data[str(ctx.guild.id)][i]["price"]
 
                             if "Objects" not in economic[str(ctx.author.id)]:
                                 economic[str(ctx.author.id)]["Objects"] = {}
                                 
                             
-                            if data[i]["name"] in economic[str(ctx.author.id)]["Objects"]:
-                                economic[str(ctx.author.id)]["Objects"][data[i]["name"]] += 1
+                            if data[str(ctx.guild.id)][str(i)]["name"] in economic[str(ctx.author.id)]["Objects"]:
+                                economic[str(ctx.author.id)]["Objects"][data[str(ctx.guild.id)][str(i)]["name"]] += 1
                             else:
-                                economic[str(ctx.author.id)]["Objects"][data[i]["name"]] = 1
+                                economic[str(ctx.author.id)]["Objects"][data[str(ctx.guild.id)][str(i)]["name"]] = 1
 
                             buy_embed= discord.Embed(title="Succes!", description="you buyed something", color=discord.Color.teal())
                             buy_embed.add_field(name="You buyed:", value=item)
@@ -303,7 +314,8 @@ class economy(commands.Cog):
                         with open("files/eco.json", "w") as f:
                             json.dump(economic, f, indent=4)
                 except Exception as error:
-                    print(error)
+                        print(error)
+
             
     @commands.command()
     async def objects(self, ctx):
@@ -311,8 +323,62 @@ class economy(commands.Cog):
             economic = json.load(f)
 
         await ctx.send(economic[str(ctx.author.id)]["Objects"])
+    
+    @commands.command()
+    async def add_object(self, ctx, *, item:str):
+        try:
+            with open("files/shop.json", "r") as f:
+                economic = json.load(f)
+            
+            
+            for i in economic[str(ctx.guild.id)]:
+                cant_items = i
+            cant_items = int(cant_items)
+            cant_items+=1
+            economic[str(ctx.guild.id)][cant_items] = {}
+            items = re.split("/", item, re.I)
+            economic[str(ctx.guild.id)][cant_items]["name"] = items[0]
+            economic[str(ctx.guild.id)][cant_items]["price"] = int(items[1])
 
+            with open("files/shop.json", "w") as f:
+                json.dump(economic, f, indent = 4)
+
+            embed_ = discord.Embed(title="Succes!", description=f"You have added the item to the shop", color=discord.Color.green())
+            embed_.add_field(name="Object name:", value=items[0])
+            embed_.add_field(name="Object value:", value=items[1])
+
+            await ctx.send(embed = embed_)
         
+        
+        except Exception as error:
+            print(error)
+    
+    @commands.command()
+    async def delete_object(self, ctx, *, item:str):
+        try:
+            with open("files/shop.json", "r") as f:
+                economic = json.load(f)
+            
+            
+            for i in economic[str(ctx.guild.id)]:
+                if economic[str(ctx.guild.id)][i]["name"] == item:
+                    economic[str(ctx.guild.id)].pop(i)
+                    break
+
+            with open("files/shop.json", "w") as f:
+                json.dump(economic, f, indent = 4)
+
+            embed_ = discord.Embed(title="Succes!", description=f"You have deleted the item to the shop", color=discord.Color.green())
+            embed_.add_field(name="Object name:", value=item)
+
+            await ctx.send(embed = embed_)
+        
+        except Exception as error:
+            print(error)
+
+
+
+
 
 async def setup(client):
     await client.add_cog(economy(client))

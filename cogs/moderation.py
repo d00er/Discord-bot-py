@@ -2,6 +2,10 @@ import discord
 from discord.ext import commands
 import json
 
+from data_base.client import db_client
+from data_base.model.server import Server
+from data_base.schemas.server import server_schema
+
 
 class moderation(commands.Cog):
     def __init__(self, client):
@@ -21,12 +25,17 @@ class moderation(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def setmuterol(self, ctx, role:discord.Role):
 
-        with open("files/mutes.json", "r") as f:
+        server = Server(**server_schema(db_client.local.servers.find_one({"id": str(ctx.guild.id)})))
+        server.mute_role = role
+
+        db_client.local.servers.find_one_and_replace({"id": str(ctx.guild.id)}, server)
+        
+        """with open("files/mutes.json", "r") as f:
             mute_role = json.load(f)
             mute_role[str(ctx.guild.id)] = role.id
 
         with open("files/mutes.json", "w") as f:
-            json.dump(mute_role, f, indent=4)
+            json.dump(mute_role, f, indent=4)"""
 
         conf_embed = discord.Embed(title="Succes!", color = discord.Color.green())
         conf_embed.add_field(name="set the role", value=f"the mute role has been set by {ctx.author.mention}", inline = False)
@@ -37,12 +46,13 @@ class moderation(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     async def mute(self, ctx, member:discord.Member):
         try:
-            with open("files/mutes.json", "r") as f:
+            """ with open("files/mutes.json", "r") as f:
                 role = json.load(f)
                 print(role[str(ctx.guild.id)])
-                mute_role=discord.utils.get(ctx.guild.roles, id=role[str(ctx.guild.id)])
-
-                #print(discord.Role(mute_role))
+                mute_role=discord.utils.get(ctx.guild.roles, id=role[str(ctx.guild.id)])"""
+            server = Server(**server_schema(db_client.local.servers.find_one({"id": str(ctx.guild.id)})))
+            mute_role = server.mute_role
+            print(discord.Role(mute_role))
             await member.add_roles(mute_role)
         except discord.Forbidden:
             print("no esta permitido papi")
@@ -55,9 +65,11 @@ class moderation(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     async def unmute(self, ctx, member:discord.Member):
         try:
-            with open("files/mutes.json", "r") as f:
+            """with open("files/mutes.json", "r") as f:
                 role = json.load(f)
-                mute_role=discord.utils.get(ctx.guild.roles, id=role[str(ctx.guild.id)])
+                mute_role=discord.utils.get(ctx.guild.roles, id=role[str(ctx.guild.id)])"""
+            server = Server(**server_schema(db_client.local.servers.find_one({"id": str(ctx.guild.id)})))
+            mute_role = server.mute_role
 
             await member.remove_roles(mute_role)
         except discord.Forbidden:

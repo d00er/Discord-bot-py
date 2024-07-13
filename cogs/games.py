@@ -18,12 +18,15 @@ class games(commands.Cog):
         await ctx.send(response)
 
     @commands.command()
-    async def get_meme(self, ctx):
-        response = requests.get("https://meme-api.com/gimme")
-        json_data = json.loads(response.text)
-        message = json_data["url"] 
-        
-        await ctx.send(message)
+    async def meme(self, ctx):
+        try:
+            response = requests.get("https://meme-api.com/gimme")
+            json_data = json.loads(response.text)
+            message = json_data["url"] 
+            
+            await ctx.send(message)
+        except Exception as error: 
+                print(error)
 
 
 async def setup(client):
