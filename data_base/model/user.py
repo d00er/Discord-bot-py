@@ -4,6 +4,6 @@ class User(BaseModel):
     id: str
     level: int
     experience: int
-    balance= int
-    deposit= int
-    objects= dict
+    balance: int
+    deposite: int
+    objects: dict
