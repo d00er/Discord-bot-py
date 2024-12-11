@@ -108,6 +108,14 @@ class moderation(commands.Cog):
 
         await ctx.send(embed = conf_embed)
 
+    @commands.command()
+    async def kik(self, ctx):
+
+        conf_embed = discord.Embed(title="Epic", color = discord.Color.green())
+        conf_embed.add_field(name="Kicked", value=f"SUCCES", inline = False)
+
+        await ctx.send(embed = conf_embed)
+
 
 
 

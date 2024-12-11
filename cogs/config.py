@@ -30,6 +30,7 @@ class configs(commands.Cog):
         embed_message.add_field(name="help goodbye", value="see the commands related to saying bye to a member", inline=False)
         embed_message.add_field(name="help levels", value="see the commands related to rank", inline=False)
         embed_message.add_field(name="help music", value="see the commands related to music", inline=False)
+        embed_message.add_field(name="help suggestion", value="see the commands related to suggestion", inline=False)
         embed_message.add_field(name="help other", value="other commands", inline=False)
         embed_message.set_image(url=ctx.guild.icon)
 
@@ -113,6 +114,14 @@ class configs(commands.Cog):
         await ctx.send(embed=embed_message)
 
     @help.command()
+    async def suggestion(self, ctx):
+        embed_message = discord.Embed(title="suggestion commands", description="commands related to the welcome of a member on the bot", color=discord.Color.purple()) 
+        embed_message.add_field(name="ask_command", value="suggest a command that its going to be sent directly to the creators of the bot.", inline=False)
+        embed_message.add_field(name="question_command", value="verify if your command idea is already on the bot", inline=False)
+        
+        await ctx.send(embed=embed_message)
+
+    @help.command()
     async def other(self, ctx):
         embed_message = discord.Embed(title="other commands", description="commands related to the welcome of a member on the bot", color=discord.Color.purple()) 
         embed_message.add_field(name="prefix", value="set the prefix of the server with the command: set_prefix", inline=False)
@@ -123,3 +132,9 @@ class configs(commands.Cog):
 
 async def setup(client):
     await client.add_cog(configs(client))
+
+
+"""
+    set_prefix, server_id, ping,(lvl commands) lvl, level_channel, (music commands) play, skip, queue, erase, remove, disconnect,  (goodbye  and weolcome commands) goodbye,channel, message, imageUrl,  (mod commands)kick, ban, unban, setmuterole, mute, unmute (fun commands) 8ball, meme, (economy commands) balance, beg, work, steal, deposite, withdraw, shop, buy, addObject, deleteObject, objects,(help commands) help economy, help moderation, help fun, help welcome, help goodbye, help levels, help music, help other, ask_command, question_command.
+
+"""
