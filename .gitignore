@@ -2,4 +2,4 @@ __pycache__
 .env
 .gitignore
 data
-secret.__pycache__
+secret.py
