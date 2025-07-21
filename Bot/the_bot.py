@@ -106,7 +106,7 @@ async def setPrefix(ctx, *, newprefix: str): ###
 
             
 async def load():
-    for filename in os.listdir("./Bot/cogs"):
+    for filename in os.listdir("./cogs"):
         if filename.endswith(".py"):
             await client.load_extension(f"cogs.{filename[:-3]}")
 
