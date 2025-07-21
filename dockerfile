@@ -12,7 +12,6 @@ COPY . /Bot/
 # --no-cache-dir es un argumento para que no descarge archivos cacheables, puesto que esta imagen es inmutable, no los vamos a usar.
 RUN pip install --no-cache-dir -r requirements.txt
 RUN mkdir downloads
-RUN apt-get install -y ffmpeg
 
 
 # Esto es un poco complicado de explicar, y tiene que ver con como funciona Python, asi que te reccomiendo buscar mas en profundidad que hace.
