@@ -1,5 +1,5 @@
 # REPROGRAMAR
-
+"""
 from ast import alias
 import discord
 from discord.ext import commands
@@ -182,3 +182,4 @@ class music_cog(commands.Cog):
 
 async def setup(client):
     await client.add_cog(music_cog(client))
+"""
