@@ -14,7 +14,7 @@ COPY Bot /Bot
 
 # Instalamos las dependencias dentro de la imagen
 # --no-cache-dir es un argumento para que no descarge archivos cacheables, puesto que esta imagen es inmutable, no los vamos a usar.
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r /requirements.txt
 RUN mkdir downloads
 
 
