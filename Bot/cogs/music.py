@@ -1,14 +1,11 @@
 # REPROGRAMAR
-"""
-from ast import alias
 import discord
 from discord.ext import commands
-from youtubesearchpython import VideosSearch
-import yt_dlp 
-from youtube_dl import YoutubeDL
+
 import asyncio
+
 class music_cog(commands.Cog):
-    
+    """
     def __init__(self, bot):
         self.bot = bot
 
@@ -178,8 +175,9 @@ class music_cog(commands.Cog):
             self.is_paused = False
             self.is_playing = True
             self.vc.resume()
+        """
 
 
 async def setup(client):
     await client.add_cog(music_cog(client))
-"""
+
