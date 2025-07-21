@@ -1,7 +1,7 @@
 __pycache__
 .env
 .gitignore
-.data
-.secret.py
-.music.py
-.venvi
+data
+secret.py
+music.py
+venv
