@@ -10,6 +10,8 @@ from data_base.client import db_client
 from data_base.model.server import Server
 from data_base.schemas.server import server_schema
 
+import webserver
+
 # https://discord.com/oauth2/authorize?client_id=1219376993989169282&permissions=8&scope=bot
 
 
@@ -111,9 +113,10 @@ async def load():
 async def main():
     async with client:
         await load()
+        
         await client.start(config("DISC_BOT_KEY"))
         
-
+webserver.keep_alive()
 asyncio.run(main())
 
 
