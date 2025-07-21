@@ -6,7 +6,7 @@ WORKDIR /Bot
 
 # Copiamos nuestro codigo de Python dentro de la carpeta app
 # Recuerda que tienes que usar el .dockerignore para que tu imagen sea mas ligera
-COPY . /Bot/ 
+COPY Bot /Bot
 
 # Instalamos las dependencias dentro de la imagen
 # --no-cache-dir es un argumento para que no descarge archivos cacheables, puesto que esta imagen es inmutable, no los vamos a usar.
