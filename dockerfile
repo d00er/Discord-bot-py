@@ -1,6 +1,10 @@
 # Descargamos Python 3 Slim
 FROM python:3.12.8-alpine3.21
 
+
+# Copia requirements primero
+COPY requirements.txt /requirements.txt
+
 # Con WORKDIR vamos a especificar en que carpeta vamos a guardar todo el codigo
 WORKDIR /Bot
 
