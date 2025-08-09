@@ -106,7 +106,7 @@ async def setPrefix(ctx, *, newprefix: str): ###
 
             
 async def load():
-    for filename in os.listdir("./cogs"):
+    for filename in os.listdir("./Bot/cogs"):
         if filename.endswith(".py"):
             await client.load_extension(f"cogs.{filename[:-3]}")
 
@@ -116,7 +116,6 @@ async def main():
         
         await client.start(config("DISC_BOT_KEY"))
         
-webserver.keep_alive()
 asyncio.run(main())
 
 
